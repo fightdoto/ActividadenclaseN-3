@@ -23,8 +23,7 @@ public class SistemaImprentaUNL {
         productosStrock(listaProductos);
 
         ArrayList<Venta> listadoVentasRealizadas = new ArrayList<Venta>();
-        ArrayList<Producto> listaProductos_deseos = new ArrayList<Producto>();
-        realizarVenta(listadoVentasRealizadas, listaProductos, input("Ingrese la cedula del Ciente"));
+        realizarVenta(listadoVentasRealizadas, listaProductos);
 
         String salida = "";
         for (int i = 0; i < listadoVentasRealizadas.size(); i++) {
@@ -54,24 +53,55 @@ public class SistemaImprentaUNL {
         listaProductos.add(new Producto("revista digital UNL", 10, 0, 50));
     }
 
-    public static void realizarVenta(ArrayList<Venta> listadoVentas, ArrayList<Producto> listaProductos, String cedula) {
-        ArrayList<Producto> listaDeseos = listaDeseosCliente(listaProductos);
+    public static void realizarVenta(ArrayList<Venta> listadoVentas, ArrayList<Producto> listaProductos) {
+
         int nuevo_c = -1;
-        if (listadoVentas.size() > 0) {
-            for (int i = 0; i < listadoVentas.size(); i++) {
-                if (cedula.equals(listadoVentas.get(i).getCliente().getCedula())) {
-                    JOptionPane.showMessageDialog(null, "Cliente Encontrado:\n" +
-                            listadoVentas.get(i).getCliente().getNombre() + "\n" +
-                            listadoVentas.get(i).getCliente().getCedula()
-                    );
-                    listadoVentas.get(i).getCliente().setConcurrencia(
-                            listadoVentas.get(i).getCliente().getConcurrencia() + 1
-                    );
-                    nuevo_c = i;
-                    break;
+        int numventas = Integer.parseInt(JOptionPane.showInputDialog(null,
+                "Ingrese el numero de ventas a realizar"));
+        for (int j = 0; j < numventas; j++) {
+            String cedula = input("Ingrese la cedula del Ciente");
+            ArrayList<Producto> listaDeseos = listaDeseosCliente(listaProductos);
+            if (listadoVentas.size() > 0) {
+
+                for (int i = 0; i < listadoVentas.size(); i++) {
+                    if (cedula.equals(listadoVentas.get(i).getCliente().getCedula())) {
+                        JOptionPane.showMessageDialog(null, "Cliente Encontrado:\n" +
+                                listadoVentas.get(i).getCliente().getNombre() + "\n" +
+                                listadoVentas.get(i).getCliente().getCedula()
+                        );
+                        listadoVentas.get(i).getCliente().setConcurrencia(
+                                listadoVentas.get(i).getCliente().getConcurrencia() + 1
+                        );
+                        nuevo_c = i;
+                        break;
+                    }
                 }
-            }
-            if (nuevo_c == -1) {
+                if (nuevo_c == -1) {
+                    Venta venta = new Venta(codVenta(),
+                            fechaActual(),
+                            totalSinDescuento(listaDeseos),
+                            listaDeseos,
+                            new Cliente(input("Ingrese Nombre del Cliente"),
+                                    cedula,
+                                    input("Ingresa email del cliente"))
+                    );
+                    metodoPago(venta,
+                            totalSinDescuento(listaDeseos) - listadoVentas.get(nuevo_c).getCliente().getDescuento());
+                    listadoVentas.add(venta);
+                } else {
+
+                    if (listadoVentas.get(nuevo_c).getCliente().getConcurrencia() > 3) {
+                        listadoVentas.get(nuevo_c).getCliente().setDescuento(totalSinDescuento(listaDeseos) * 0.05);
+                    }
+                    Venta venta = new Venta(codVenta(), fechaActual(), totalSinDescuento(listaDeseos), listaDeseos,
+                            listadoVentas.get(nuevo_c).getCliente()
+                    );
+                    metodoPago(venta,
+                            totalSinDescuento(listaDeseos) - listadoVentas.get(nuevo_c).getCliente().getDescuento());
+                    listadoVentas.add(venta);
+                }
+            } else {
+
                 Venta venta = new Venta(codVenta(),
                         fechaActual(),
                         totalSinDescuento(listaDeseos),
@@ -81,33 +111,9 @@ public class SistemaImprentaUNL {
                                 input("Ingresa email del cliente"))
                 );
                 metodoPago(venta,
-                        totalSinDescuento(listaDeseos) - listadoVentas.get(nuevo_c).getCliente().getDescuento());
-                listadoVentas.add(venta);
-            } else {
-
-                if (listadoVentas.get(nuevo_c).getCliente().getConcurrencia() > 3) {
-                    listadoVentas.get(nuevo_c).getCliente().setDescuento(totalSinDescuento(listaDeseos) * 0.05);
-                }
-                Venta venta = new Venta(codVenta(), fechaActual(), totalSinDescuento(listaDeseos), listaDeseos,
-                        listadoVentas.get(nuevo_c).getCliente()
-                );
-                metodoPago(venta,
-                        totalSinDescuento(listaDeseos) - listadoVentas.get(nuevo_c).getCliente().getDescuento());
+                        totalSinDescuento(listaDeseos));
                 listadoVentas.add(venta);
             }
-        } else {
-
-            Venta venta = new Venta(codVenta(),
-                    fechaActual(),
-                    totalSinDescuento(listaDeseos),
-                    listaDeseos,
-                    new Cliente(input("Ingrese Nombre del Cliente"),
-                            cedula,
-                            input("Ingresa email del cliente"))
-            );
-            metodoPago(venta,
-                    totalSinDescuento(listaDeseos) - listadoVentas.get(nuevo_c).getCliente().getDescuento());
-            listadoVentas.add(venta);
         }
     }
 
@@ -125,12 +131,15 @@ public class SistemaImprentaUNL {
                             JOptionPane.showMessageDialog(null, "Producto " + listaProductos.get(j).getNombreProducto() + ":\n" +
                                     listaProductos.get(j).getStock() + "\n" +
                                     listaProductos.get(j).getPrecio());
-                            int num = Integer.parseInt(JOptionPane.showInputDialog("Ingresa cantidad del producto"));
-                            if (listaProductos.get(j).getStock() < num) {
-                                listaProductos.get(j).setStock(listaProductos.get(j).getStock() - num);
+                            int cant = Integer.parseInt(JOptionPane.showInputDialog("Ingresa cantidad del producto"));
+                            double stock = listaProductos.get(j).getStock();
+                            if (cant <= stock) {
+                                double aux1 = stock - cant;
+                                listaProductos.get(j).setStock(aux1);
                                 Producto p = listaProductos.get(j);
-                                p.setCantidad(num);
-                                listaProductos.add(p);
+                                p.setCantidad(cant);
+                                listaDeseos.add(p);
+                                JOptionPane.showMessageDialog(null, "Elemto Ingresado en la lsita de deseos");
                             } else {
                                 JOptionPane.showMessageDialog(null, "Stock sobrepasados");
                             }
@@ -139,7 +148,7 @@ public class SistemaImprentaUNL {
                             aux = true;
                         }
                     }
-                    if (aux) {
+                    if (!aux) {
                         JOptionPane.showMessageDialog(null, "Producto no registrado");
                     }
                     break;
@@ -181,7 +190,7 @@ public class SistemaImprentaUNL {
                 Efectivo efectivo = new Efectivo("Cp1", fechaActual(), catidad);
                 venta.setPago(efectivo);
                 JOptionPane.showMessageDialog(null,
-                        "Efectivo: "+efectivo.getCantidad()
+                        "Efectivo: " + efectivo.getCantidad()
                 );
                 break;
             case "transferencia":
@@ -189,7 +198,7 @@ public class SistemaImprentaUNL {
                 Pago pa = new Transferencia("CTrans1", fechaActual(), recargo);
                 venta.setPago(pa);
                 JOptionPane.showMessageDialog(null,
-                        "Transacción: "+pa.getCantidad()
+                        "Transacción: " + pa.getCantidad()
                 );
                 break;
         }
