@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="SistemaImprentaUNL">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/SistemaImprentaUNL5/dist/SistemaImprentaUNL.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
