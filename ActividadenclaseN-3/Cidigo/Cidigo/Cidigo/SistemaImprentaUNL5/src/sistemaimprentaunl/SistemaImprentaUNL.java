@@ -19,135 +19,180 @@ public class SistemaImprentaUNL {
      */
     public static void main(String[] args) {
         // TODO code application logic here
-        System.out.println("*****SISTEMA IMPRENTA UNL");
-
-        ArrayList<Producto> listaProducto = new ArrayList<Producto>();
-        listaProducto.add(new Producto("resma de hojas", 3, 0, 50));
-        listaProducto.add(new Producto("tinta", 10, 0, 50));
-        listaProducto.add(new Producto("lapices", 0.90, 0, 50));
-        listaProducto.add(new Producto("borradores", 0.50, 0, 50));
-        listaProducto.add(new Producto("revista digital UNL", 10, 0, 50));
+        ArrayList<Producto> listaProductos = new ArrayList<Producto>();
+        productosStrock(listaProductos);
 
         ArrayList<Venta> listadoVentasRealizadas = new ArrayList<Venta>();
+        ArrayList<Producto> listaProductos_deseos = new ArrayList<Producto>();
+        realizarVenta(listadoVentasRealizadas, listaProductos, input("Ingrese la cedula del Ciente"));
 
-
-        int num_clientes = Integer.parseInt(JOptionPane.showInputDialog(null, "Ingrese el numero de clientes a facturar"));
-        ArrayList<Cliente> clientes = new ArrayList<>();
-        Cliente cliente = null;
-        for (int i = 0; i < num_clientes; i++) {
-            String cedula = JOptionPane.showInputDialog("Ingresa tu cedula");
-            if (i > 0) {
-                boolean nuevo_c = false;
-                for (int j = 0; j < clientes.size(); j++) {
-                    if (cedula.equals(clientes.get(j).getCedula())) {
-                        clientes.get(j).setConcurrencia(clientes.get(j).getConcurrencia() + 1);
-                        JOptionPane.showMessageDialog(null, "cliente: \n" + clientes.get(j).getNombre());
-                        break;
-                    } else {
-                        nuevo_c = true;
-                    }
-                }
-                if (nuevo_c) {
-                    cliente = new Cliente(JOptionPane.showInputDialog("Ingrese Nombre del Cliente"), cedula, JOptionPane.showInputDialog("Ingresa email Cliente"));
-                }
-            } else {
-                cliente = new Cliente(JOptionPane.showInputDialog("Ingrese Nombre del Cliente"), cedula, JOptionPane.showInputDialog("Ingresa email Cliente"));
-            }
-            ArrayList<Producto> listaProductos_deseos = new ArrayList<Producto>();
-            boolean bucle = true;
-            while (bucle) {
-                int num_productos = Integer.parseInt(JOptionPane.showInputDialog(null, "1.Ingresar producto \n2.salir  :"));
-                switch (num_productos) {
-                    case 1:
-                        String nombre_producto = JOptionPane.showInputDialog("Ingresa nombre producto");
-                        boolean aux = false;
-                        for (int j = 0; j < listaProducto.size(); j++) {
-                            if (nombre_producto.equals(listaProducto.get(j).getNombreProducto())) {
-                                JOptionPane.showMessageDialog(null, "Producto " + listaProducto.get(j).getNombreProducto() + ":\n" +
-                                        listaProducto.get(j).getStock() + "\n" +
-                                        listaProducto.get(j).getPrecio());
-                                int num = Integer.parseInt(JOptionPane.showInputDialog("Ingresa cantidad del producto"));
-
-                                listaProducto.get(j).setStock(listaProducto.get(j).getStock() - num);
-                                aux = true;
-                                Producto p = listaProducto.get(j);
-                                p.setCantidad(num);
-                                listaProductos_deseos.add(p);
-                                break;
-                            }
-                        }
-                        if (!aux) {
-                            JOptionPane.showMessageDialog(null, "Producto no registrado");
-                        }
-                        break;
-                    case 2:
-                        bucle = false;
-                        break;
-                }
-            }
-            double total = 0;
-            for (int j = 0; j < listaProductos_deseos.size(); j++) {
-                total += listaProductos_deseos.get(j).getPrecio() * listaProductos_deseos.get(j).getCantidad();
-            }
-            int anio = Calendar.getInstance().get(Calendar.YEAR);
-            System.out.println("Año:" + anio);
-
-            int mes = Calendar.getInstance().get(Calendar.MONTH);
-            mes += 1;
-            System.out.println("Mes:" + mes);
-
-            int dia = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
-            System.out.println("Día:" + dia);
-
-            String fechaActual = Integer.toString(anio) + "-" + Integer.toString(mes) + " -" + Integer.toString(dia);
-            System.out.println("Fecha Actual:" + fechaActual);
-
-            String CodVenta = "Factura 001-001-" + (int) (Math.random() * 100 + 1);
-            if ((cliente.getConcurrencia() < 3)) {
-                cliente.setDescuento(total * 0.05);
-            } else {
-                cliente.setDescuento(0);
-            }
-            clientes.add(cliente);
-            Venta venta = new Venta(CodVenta, fechaActual, total - cliente.getDescuento(), listaProductos_deseos, cliente);
-
-            switch (JOptionPane.showInputDialog(null, "Desea pagar en efectivo o por transferencia: ")) {
-                case "efectivo":
-                    Efectivo efectivo = new Efectivo("Cp1", fechaActual, total - (cliente.getDescuento()));
-                    venta.setPago(efectivo);
-                    JOptionPane.showMessageDialog(null,
-                            efectivo.getCantidad()
-                    );
-                    break;
-                case "transferencia":
-                    double interes = total + (total * 0.03);
-                    Pago pa = new Transferencia("CTrans1", fechaActual, interes);
-                    venta.setPago(pa);
-                    JOptionPane.showMessageDialog(null,
-                            pa.getCantidad()
-                    );
-                    break;
-            }
-            listadoVentasRealizadas.add(venta);
-            System.out.println(venta);
-        }
         String salida = "";
-        salida = "";
-        for (int i = 0; i < clientes.size(); i++) {
-            salida += (listadoVentasRealizadas.get(i).getPago() instanceof Efectivo) ? clientes.get(i).getNombre() : "";
+        for (int i = 0; i < listadoVentasRealizadas.size(); i++) {
+            salida += (listadoVentasRealizadas.get(i).getPago() instanceof Efectivo) ? listadoVentasRealizadas.get(i).getCliente().getNombre() : "";
         }
-        JOptionPane.showMessageDialog(null, "Los clientes que pagaron en efectivo son:\n" +
-                salida);
 
-        Secretaria s = new Secretaria("Almudena", "1105964844", "almudena@gmail.com", 2, 5);
-        System.out.println("Secretaria " + s.getNombre() + ":");
-        System.out.println("sueldo: "+s.sueldo());
-        Disenador d = new Disenador("Jean", "1105964444", "jean@gmail.com", 2, 5.7);
-        System.out.println("Diseñador " + d.getNombre() + ":");
-        System.out.println("sueldo: "+d.sueldo());
+//
+//        Secretaria s = new Secretaria("Almudena", "1105964844", "almudena@gmail.com", 2, 5);
+//        System.out.println("Secretaria " + s.getNombre() + ":");
+//        System.out.println("sueldo: " + s.sueldo());
+//        Disenador d = new Disenador("Jean", "1105964444", "jean@gmail.com", 2, 5.7);
+//        System.out.println("Diseñador " + d.getNombre() + ":");
+//        System.out.println("sueldo: " + d.sueldo());
 
 
     }
 
+    public static String input(String msg) {
+        return JOptionPane.showInputDialog(null, msg).toLowerCase().trim();
+    }
+
+    public static void productosStrock(ArrayList<Producto> listaProductos) {
+        listaProductos.add(new Producto("resma de hojas", 3, 0, 50));
+        listaProductos.add(new Producto("tinta", 10, 0, 50));
+        listaProductos.add(new Producto("lapices", 0.90, 0, 50));
+        listaProductos.add(new Producto("borradores", 0.50, 0, 50));
+        listaProductos.add(new Producto("revista digital UNL", 10, 0, 50));
+    }
+
+    public static void realizarVenta(ArrayList<Venta> listadoVentas, ArrayList<Producto> listaProductos, String cedula) {
+        ArrayList<Producto> listaDeseos = listaDeseosCliente(listaProductos);
+        int nuevo_c = -1;
+        if (listadoVentas.size() > 0) {
+            for (int i = 0; i < listadoVentas.size(); i++) {
+                if (cedula.equals(listadoVentas.get(i).getCliente().getCedula())) {
+                    JOptionPane.showMessageDialog(null, "Cliente Encontrado:\n" +
+                            listadoVentas.get(i).getCliente().getNombre() + "\n" +
+                            listadoVentas.get(i).getCliente().getCedula()
+                    );
+                    listadoVentas.get(i).getCliente().setConcurrencia(
+                            listadoVentas.get(i).getCliente().getConcurrencia() + 1
+                    );
+                    nuevo_c = i;
+                    break;
+                }
+            }
+            if (nuevo_c == -1) {
+                Venta venta = new Venta(codVenta(),
+                        fechaActual(),
+                        totalSinDescuento(listaDeseos),
+                        listaDeseos,
+                        new Cliente(input("Ingrese Nombre del Cliente"),
+                                cedula,
+                                input("Ingresa email del cliente"))
+                );
+                metodoPago(venta,
+                        totalSinDescuento(listaDeseos) - listadoVentas.get(nuevo_c).getCliente().getDescuento());
+                listadoVentas.add(venta);
+            } else {
+
+                if (listadoVentas.get(nuevo_c).getCliente().getConcurrencia() > 3) {
+                    listadoVentas.get(nuevo_c).getCliente().setDescuento(totalSinDescuento(listaDeseos) * 0.05);
+                }
+                Venta venta = new Venta(codVenta(), fechaActual(), totalSinDescuento(listaDeseos), listaDeseos,
+                        listadoVentas.get(nuevo_c).getCliente()
+                );
+                metodoPago(venta,
+                        totalSinDescuento(listaDeseos) - listadoVentas.get(nuevo_c).getCliente().getDescuento());
+                listadoVentas.add(venta);
+            }
+        } else {
+
+            Venta venta = new Venta(codVenta(),
+                    fechaActual(),
+                    totalSinDescuento(listaDeseos),
+                    listaDeseos,
+                    new Cliente(input("Ingrese Nombre del Cliente"),
+                            cedula,
+                            input("Ingresa email del cliente"))
+            );
+            metodoPago(venta,
+                    totalSinDescuento(listaDeseos) - listadoVentas.get(nuevo_c).getCliente().getDescuento());
+            listadoVentas.add(venta);
+        }
+    }
+
+    public static ArrayList<Producto> listaDeseosCliente(ArrayList<Producto> listaProductos) {
+        ArrayList<Producto> listaDeseos = new ArrayList<>();
+        boolean bucle = true;
+        while (bucle) {
+            int num_productos = Integer.parseInt(JOptionPane.showInputDialog(null, "1.Ingresar producto \n2.salir"));
+            switch (num_productos) {
+                case 1:
+                    String nombre_producto = input("Ingresa nombre producto");
+                    boolean aux = false;
+                    for (int j = 0; j < listaProductos.size(); j++) {
+                        if (nombre_producto.equals(listaProductos.get(j).getNombreProducto())) {
+                            JOptionPane.showMessageDialog(null, "Producto " + listaProductos.get(j).getNombreProducto() + ":\n" +
+                                    listaProductos.get(j).getStock() + "\n" +
+                                    listaProductos.get(j).getPrecio());
+                            int num = Integer.parseInt(JOptionPane.showInputDialog("Ingresa cantidad del producto"));
+                            if (listaProductos.get(j).getStock() < num) {
+                                listaProductos.get(j).setStock(listaProductos.get(j).getStock() - num);
+                                Producto p = listaProductos.get(j);
+                                p.setCantidad(num);
+                                listaProductos.add(p);
+                            } else {
+                                JOptionPane.showMessageDialog(null, "Stock sobrepasados");
+                            }
+                            break;
+                        } else {
+                            aux = true;
+                        }
+                    }
+                    if (aux) {
+                        JOptionPane.showMessageDialog(null, "Producto no registrado");
+                    }
+                    break;
+                case 2:
+                    bucle = false;
+                    break;
+            }
+        }
+        return listaDeseos;
+    }
+
+    public static String fechaActual() {
+        int anio = Calendar.getInstance().get(Calendar.YEAR);
+//        System.out.println("Año:" + anio);
+        int mes = Calendar.getInstance().get(Calendar.MONTH);
+        mes += 1;
+//        System.out.println("Mes:" + mes);
+        int dia = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
+//        System.out.println("Día:" + dia);
+        return Integer.toString(anio) + "-" + Integer.toString(mes) + " -" + Integer.toString(dia);
+//        System.out.println("Fecha Actual:" + fechaActual);
+    }
+
+    public static String codVenta() {
+        return "Factura 001-001-" + (int) (Math.random() * 100 + 1);
+    }
+
+    public static double totalSinDescuento(ArrayList<Producto> listaDeseo) {
+        double total = 0;
+        for (int i = 0; i < listaDeseo.size(); i++) {
+            total += listaDeseo.get(i).getCantidad() * listaDeseo.get(i).getPrecio();
+        }
+        return total;
+    }
+
+    public static void metodoPago(Venta venta, double catidad) {
+        switch (input("Desea pagar en efectivo o por transferencia: ")) {
+            case "efectivo":
+                Efectivo efectivo = new Efectivo("Cp1", fechaActual(), catidad);
+                venta.setPago(efectivo);
+                JOptionPane.showMessageDialog(null,
+                        "Efectivo: "+efectivo.getCantidad()
+                );
+                break;
+            case "transferencia":
+                double recargo = catidad + (catidad * 0.03);
+                Pago pa = new Transferencia("CTrans1", fechaActual(), recargo);
+                venta.setPago(pa);
+                JOptionPane.showMessageDialog(null,
+                        "Transacción: "+pa.getCantidad()
+                );
+                break;
+        }
+    }
 }
 
